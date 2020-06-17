@@ -76,4 +76,60 @@ private:
         findSwapTreeNodePointers(root->right, prev, first, second);
     }
 };
+
+// (第一个网站有误，prev不应等于cur.left)
+// https://www.cnblogs.com/anniekim/archive/2013/06/15/morristraversal.html 
+// https://zhuanlan.zhihu.com/p/102285533
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        if (!root) return; 
+        TreeNode *first = nullptr, *second = nullptr;
+        inorderMorrisTraverse(root, first, second);
+        
+        int temp = first->val;
+        first->val = second->val;
+        second->val = temp;
+    }
+private:
+    void inorderMorrisTraverse(TreeNode* root, TreeNode* &first, TreeNode* &second) {
+        TreeNode *cur = root;
+        TreeNode *prev = nullptr;
+
+        while (cur) {
+            auto morrisRight = cur->left;
+            if (morrisRight) {
+                while(morrisRight->right && morrisRight->right != cur)
+                    morrisRight = morrisRight->right;
+                if (!(morrisRight->right)) {
+                    morrisRight->right = cur;
+                    cur = cur->left;
+                    // jump out
+                    continue;
+                }
+                // remove brige
+                morrisRight->right = nullptr;
+            }
+
+            // doSometingInorderTraverse()
+            if (prev && prev->val > cur->val) {
+                second = cur;
+                if (!first) first = prev;
+            }
+            prev = cur;
+            cur = cur->right;
+        }
+    }
 };
